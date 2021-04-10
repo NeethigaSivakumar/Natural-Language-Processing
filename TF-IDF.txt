@@ -1,0 +1,93 @@
+import nltk
+nltk.download()
+rawData=open("SMSSpamCollection.tsv").read()
+rawData[0:250]
+import pandas as pd
+data=pd.read_csv('SMSSpamCollection.tsv',sep='\t',names=['labels','body_t
+ext'],header=None)
+data.head()
+import string
+string.puntuation
+def remove_punct(text):text_nopunct="".join([char for char in text if char not in
+string.punctuation])
+return text_nopunct
+data['body'_text_clean]=data['body_text'].apply(lambda x:remove_punct(x))
+data.head()
+import re
+def tokenize(text):
+tokens=re.split('\W+',text)
+return tokens
+data['body_text_tokenized']=data['body_text_clean'].apply(lambda
+x:tokenize(x.lower()))
+data.head()
+import nltk
+stopword=nltk.corpus.stopwords.words('english')
+def remove_stopwords(tokenized_list):
+text=[word for word in tokenized_list if word not in stopword]
+return text
+data['body_text_nostop']=data['body_text_tokenized'].apply(lambda
+x:remove_stopwords(x))
+data.head()
+ps=nltk.PorterStemmer()
+def stemming(tokenized_text):
+text=[ps.stem(word) for word in tokenized_text]
+return text
+data['body_text_stemmed']=data['body_text_nostop'].apply(lambda
+x:stemming(x))
+data.head()
+wn=nltk.WordNetLemmatizer()
+def lemmatizing(tokenized_text):
+text=[wn.lemmatize(word) for word in tokenized_text]
+return textdata['body_text_lemmatized']=data['body_text_nostop'].apply(lambda x:
+lemmatizing(x))
+data.head(10)
+from sklearn.feature_extraction.text import CountVectorizer
+count_vect=CountVectorizer(analyzer=clean_text)
+X_counts=count_vect.fit_transform(data['body_text'])
+print(X_counts.shape)
+print(count_vect.get_feature_names())
+from sklearn.feature_extraction.text import CountVectorizer
+ngram_vect=CountVectorizer(ngram_range=(2,2),analyzer=clean_text)
+X_counts=ngram_vect.fit_transform(data['body_text'])
+print(X_counts.shape)
+print(ngram_vecto.get_feature_names())
+from sklearn.feature_extraction.text import TfidVectorizer
+tfidf_vect=TfidVectorizer(analyzer=clean_text)
+X_tfidf=tfidf_vect.fit.transform(data['body_text'])
+print(X_tfidf.shape)
+print(tfidf_vect.get_feature_names())
+import string
+data['body_len']=data['body_text'].apply(lambda x:len(x)-x.count(" "))
+data.head()
+def count_punct(text):
+count=sum([1 for char in text if char in string.punctuation])
+return round(count/(len(text)-text.count(" ")),3)*100
+data['punct%']=data['body_text'].apply(lambda x: count_punct(x))
+data.head()
+bins=np.linspace(0,200,40)
+plt.hist(data[data['label']=='spam']['body_len'],bins,alpha=0.5,normed=True,l
+abel='spam')
+plt.hist(data[data['label']=='ham']['body_len'],bins,alpha=0.5,normed=True,la
+bel='ham')
+plt.legend(loc='upper left')plt.show()
+bins=np.linspace(0,50,40)
+plt.hist(data[data['label']=='spam']['punct%'],bins,alpha=0.5,normed=True,la
+bel='spam')
+plt.hist(data[data['label']=='ham']['punct%'],bins,alpha=0.5,normed=True,lab
+el='ham')
+plt.legend(loc='upper right')
+plt.show()
+rf=RandomForestClassifier()
+param={'n_estimators':[10,150,300],
+max_depth':[30,60,90,None]}
+gs=GridSearchCV(rf,param,cv=5,n_jobs=-1)
+gs_fit=gs.fit(X_count_feat,data['label'])
+pd.DataFrame(gs_fit.cv_results_).sort_values('mean_test_score',ascending
+=False).head()
+rf=RandomForestClassifier()
+param={'n_estimators':[10,150,300],
+max_depth':[30,60,90,None]}
+gs=GridSearchCV(rf,param,cv=5,n_jobs=-1)
+gs_fit=gs.fit(X_tfidf_feat,data['label'])
+pd.DataFrame(gs_fit.cv_results_).sort_values('mean_test_score',ascending
+=False).head() 
